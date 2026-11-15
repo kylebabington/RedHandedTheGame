@@ -1,0 +1,33 @@
+---
+description: The Evidence Room project guardrails — milestone boundaries, source of truth, IP, and verification honesty
+alwaysApply: true
+---
+
+# The Evidence Room — Project Rules
+
+## Source of truth
+
+1. Read `docs/MASTER_PLAN.md` before implementing any milestone work.
+2. Read relevant supporting docs (`docs/ARCHITECTURE.md`, `docs/DESIGN_SYSTEM.md`, `docs/CASE_001.md`, `docs/ROADMAP.md`, `docs/DECISIONS.md`, `docs/TEST_PLAN.md`, `docs/PROGRESS.md`) before changing related systems.
+3. Source-of-truth hierarchy: MASTER_PLAN → ARCHITECTURE → CASE_001 → DESIGN_SYSTEM → DECISIONS → existing code/tests → Cursor prompts.
+4. Never silently change product requirements. If a prompt conflicts with the master plan, identify the conflict and stop for approval.
+
+## Milestone discipline
+
+5. Implement only the authorized milestone. Do not start the next milestone without explicit approval.
+6. Stop at milestone boundaries and produce the milestone report format from `docs/MASTER_PLAN.md`.
+7. Preserve the established architecture. Avoid unnecessary rewrites of working systems.
+8. Do not expand scope without approval.
+
+## Quality and honesty
+
+9. Add tests for implemented behavior.
+10. Run relevant verification for the milestone.
+11. Never claim tests passed unless they were actually executed. Distinguish passed, failed, not executed, and blocked.
+12. After each milestone, update `docs/PROGRESS.md` and record important decisions in `docs/DECISIONS.md`.
+
+## Intellectual property and safety
+
+13. Never use unauthorized RedHanded intellectual property (official logos, artwork, host likenesses, recordings, or copyrighted episode material).
+14. Never commit or push without explicit authorization.
+15. Do not delete unrelated files, reset Git history, force-push, or modify unrelated system configuration.
