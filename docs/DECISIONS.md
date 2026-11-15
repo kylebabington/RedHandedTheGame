@@ -60,3 +60,71 @@ Record of significant architectural and product decisions. Status labels: **Appr
 **Decision:** Milestone 0 includes documentation, tooling, Cursor rules, design tokens, routing, placeholder landing, not-found, and smoke tests. Do not implement game engine, case schemas/content modules, evidence board, interviews, timeline/puzzles, verdict scoring, fan challenges, or the cinematic M2 interface.
 
 **Consequences:** Architecture is documented in `docs/ARCHITECTURE.md` as planned. Code remains a minimal accessible foundation.
+
+---
+
+## ADR-006 — Declarative unlock condition union
+
+**Date:** 2026-11-15
+**Status:** Approved / Implemented (M1)
+
+**Decision:** Unlock conditions are a Zod discriminated union: `always`, `evidenceAll`, `evidenceAny`, `puzzlesAll`, `dialogueCompleted`, `actAtLeast`, `all`, `any`. Case validation resolves every referenced ID.
+
+**Consequences:** Progression rules stay data-driven. Nested `all`/`any` cover compound gates without custom code per case.
+
+---
+
+## ADR-007 — Act progression and final-act boundary
+
+**Date:** 2026-11-15
+**Status:** Approved / Implemented (M1)
+
+**Decision:** Each act declares `completeWhen`. After a successful mutation, the engine advances `currentAct` while the current act’s condition is met. When the **final** act’s `completeWhen` passes, `currentAct` remains on that final act number and never advances past `acts.length`.
+
+**Consequences:** `currentAct` always names a defined act. Callers treat final-act completion via puzzle/dialogue/verdict state, not a sentinel act index.
+
+---
+
+## ADR-008 — Evidence connections store case connection IDs
+
+**Date:** 2026-11-15
+**Status:** Approved / Implemented (M1)
+
+**Decision:** `GameState.evidenceConnections` stores canonical connection definition IDs from case content (for example `CX_LOG_PHOTO`), not free-form pair encodings.
+
+**Consequences:** Save validation can resolve connection IDs against the active case. Pair geometry remains content data.
+
+---
+
+## ADR-009 — Scoring derivation and verdict answers outside GameState
+
+**Date:** 2026-11-15
+**Status:** Approved / Implemented (M1)
+
+**Decision:** `calculateScore(state, caseDef, verdictAnswers?)` uses master-plan weights (20/20/20/30/10) and rating bands. Category ratios: scored evidence discovery, contradiction puzzle completion, timeline order match, classification puzzle completion, and verdict answer matches. `GameState` persists only `verdictSubmitted`. Verdict answer maps are session data; the save envelope may optionally carry `verdictAnswers` so resume can score.
+
+**Caller reload flow:** `submitVerdict(answers)` → `serialize()` (envelope includes `verdictAnswers`) → fresh `createGame(case)` → `loadSave(envelope)` restores session answers → `engine.calculateScore()` (uses restored answers by default) or `engine.calculateScore(engine.getVerdictAnswers())`. Scoring with only `getState()` and no answers yields 0 for final conclusions. A rejected `loadSave` leaves both `GameState` and session `verdictAnswers` unchanged.
+
+**Consequences:** The GameState contract stays aligned with the master plan. Scoring remains deterministic and testable without a verdict UI (M8).
+
+---
+
+## ADR-010 — Pure engine API; Zustand optional in M1
+
+**Date:** 2026-11-15
+**Status:** Approved / Implemented (M1)
+
+**Decision:** The public M1 surface is `createGame(caseDef)` (pure TypeScript). Persistence uses a `KeyValueStorage` port with an in-memory test double. Zustand is installed but not required for the exit gate; a React store may wrap the engine in later UI milestones.
+
+**Consequences:** Engine tests run headless without rendering. UI milestones can adopt Zustand without rewriting rules.
+
+---
+
+## ADR-011 — Fixture case CASE_FIX_001 for M1
+
+**Date:** 2026-11-15
+**Status:** Approved / Implemented (M1)
+
+**Decision:** M1 proves the engine with original fictional fixture `CASE_FIX_001` (“The Empty Locker”), not production `CASE_001` content.
+
+**Consequences:** CASE_001 modules remain Milestone 3. The fixture exercises two acts, evidence unlocks, puzzles, dialogue, connections, timeline, save/load, and scoring.

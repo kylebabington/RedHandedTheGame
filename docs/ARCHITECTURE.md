@@ -4,7 +4,7 @@
 
 - **Approved:** Required by `docs/MASTER_PLAN.md`
 - **Planned:** Designed for later milestones; not implemented yet
-- **Implemented (M0):** Present in the current foundation
+- **Implemented (M0/M1):** Present in the current codebase
 - **Future proposal:** Pitch-era ideas pending later authorization
 
 ## Overview
@@ -13,39 +13,41 @@
 
 **Implemented (M0):** Application entry, React Router shell, global styles with design tokens, accessible page structure, landing page, and not-found route.
 
-**Not implemented in M0:** Engine modules, Zod case schemas, Zustand game store, persistence, scoring, and case content modules.
+**Implemented (M1):** Zod case/evidence/puzzle/dialogue schemas, pure `createGame` engine, unlock/act progression, versioned save/load with case-aware validation, deterministic scoring foundation, fixture case `CASE_FIX_001`, headless Vitest coverage. Zustand store not wired yet (optional; see ADR-010).
 
 ## High-level architecture
 
 ```
 APP SHELL
    |
-   +-- UI SYSTEM (screens, components)
+   +-- UI SYSTEM (screens, components)       [M0 shell; cinematic UI M2+]
    |
-   +-- GAME ENGINE (state, rules, scoring)   [Planned — M1+]
+   +-- GAME ENGINE (state, rules, scoring)   [Implemented — M1]
    |
-   +-- CONTENT ENGINE (case data, assets)    [Planned — M1/M3]
+   +-- CONTENT ENGINE (case data, assets)    [Fixture M1; CASE_001 in M3]
            |
-           +-- VALIDATION (Zod)              [Planned — M1]
+           +-- VALIDATION (Zod)              [Implemented — M1]
            |
-           +-- PERSISTENCE (localStorage)    [Planned — M1]
+           +-- PERSISTENCE (storage port)    [Implemented — M1]
 ```
 
-## Planned case content schemas (M1)
+## Case content schemas (M1)
 
-Zod schemas will validate case packages before use. Expected domains:
+Zod schemas validate case packages before use:
 
 - Case metadata (id, title, acts, difficulty, playtime)
 - Characters
 - Evidence (`EvidenceType`: document | photograph | audio | diagram | record | physical)
 - Puzzles (`PuzzleType`: evidence-comparison | timeline-ordering | contradiction | classification | evidence-connection | final-verdict)
-- Dialogue / interview trees with evidence-dependent unlocks
-- Verdict questions and answer keys
-- Unlock / progression rules
+- Dialogue entries with unlock conditions
+- Verdict questions and answer keys (scoring config)
+- Unlock / progression rules (`UnlockCondition` union — ADR-006)
 
-## Planned game state (M1)
+Public entry: `validateCase` / `parseCase` in `src/engine/schemas/`.
 
-Initial contract from the master plan:
+## Game state (M1)
+
+Contract from the master plan (implemented as Zod `gameStateSchema`, `schemaVersion` literal `1`):
 
 ```ts
 interface GameState {
@@ -63,27 +65,28 @@ interface GameState {
 }
 ```
 
-Implementation may introduce more precise types and normalized structures while preserving the contract intent.
+Verdict answer maps are outside this contract (ADR-009).
 
-## Planned progression rules
+## Progression rules (M1)
 
-- Evidence discovery and puzzle completion drive unlocks.
-- Players can revisit evidence, interviews, and timeline without dead ends from incorrect answers.
-- Solution content must not appear in player-facing UI before verdict submission.
+- Evidence discovery and puzzle completion drive unlocks via declarative conditions.
+- Rejected actions throw `EngineError` and leave state unchanged.
+- Acts advance when `completeWhen` is satisfied; the final act does not advance past the last act number (ADR-007).
+- Incorrect puzzle answers do not mutate progression state.
 
-## Planned puzzle engine
+## Puzzle engine (M1 foundation)
 
-Structured puzzle definitions evaluated by pure functions. UI presents puzzles; engine validates answers and updates progression.
+Structured puzzle definitions with solution kinds `exact` | `order` | `map`. UI presentation is later; engine validates answers and updates progression.
 
-## Planned evidence system
+## Evidence system (M1 foundation)
 
-Inventory, inspection, related evidence, unlock conditions, accessibility descriptions, and optional media with graceful degradation when assets are missing.
+Definitions include unlock conditions, related evidence, asset refs, and accessibility descriptions. Discovery/inspection are engine actions.
 
-## Planned dialogue system
+## Dialogue system (M1 foundation)
 
-Branching interviews with evidence-dependent questions, contradiction challenges, and persistent progress.
+Dialogue entries unlock from conditions and can be completed. Full branching interview trees remain later milestones.
 
-## Planned verdict scoring
+## Verdict scoring (M1 foundation)
 
 Deterministic weighted scoring:
 
@@ -97,27 +100,27 @@ Deterministic weighted scoring:
 
 Ratings: Master Investigator, Skeptic, Detective, Amateur Sleuth, Back to the Evidence.
 
-## Planned persistence
+## Persistence (M1)
 
-Versioned localStorage saves for case progress and settings. Invalid saves fail safely. No auth for the pitch prototype.
+Versioned save envelope `{ schemaVersion, caseId, state, verdictAnswers? }`. Validated structurally and against the active case (act + entity IDs). Invalid saves fail without mutating active state. `KeyValueStorage` port supports memory doubles and `localStorage`. Settings persistence remains for later UI milestones.
 
 ## Adding a new case without rewriting the app
 
-**Planned model:**
-
-1. Add `src/content/cases/case-00N/` with validated JSON/TS content and assets under `public/`.
-2. Register the case in a case registry consumed by the content engine.
+1. Add `src/content/cases/case-00N/` with validated content and assets under `public/`.
+2. Register the case in a case registry (full registry arrives with M3).
 3. Engine and UI remain case-agnostic; only content and assets change.
+
+M1 ships fixture `CASE_FIX_001` only.
 
 ## Testing strategy
 
 | Layer | Focus | Status |
 | --- | --- | --- |
-| Unit | Engine rules, scoring, validation without UI | Planned M1+ |
+| Unit | Engine rules, scoring, validation without UI | Implemented M1 (22 tests) |
 | Component | Routing, pages, interactive UI | Implemented M0 smoke |
 | E2E | Critical player flows | M0 smoke; full flows M10 |
 
-## Stack notes (M0)
+## Stack notes
 
 Compatible stables installed: React 19, Vite, Tailwind CSS v4 (`@tailwindcss/vite`), React Router, Zustand, Zod, Motion, Vitest, Testing Library, Playwright, ESLint, Prettier.
 

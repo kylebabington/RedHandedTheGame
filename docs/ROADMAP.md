@@ -5,8 +5,8 @@
 
 | Milestone | Deliverable | Priority | Status |
 | --- | --- | --- | --- |
-| M0 | Repository and source-of-truth setup | Critical | In progress (this milestone) |
-| M1 | Application foundation and game engine | Critical | Planned |
+| M0 | Repository and source-of-truth setup | Critical | PASS (`f3d7da4`) |
+| M1 | Game engine | Critical | PASS (pending human GO for M2) |
 | M2 | Cinematic visual foundation | Critical | Planned |
 | M3 | Case content and narrative engine | Critical | Planned |
 | M4 | Evidence investigation system | Critical | Planned |
@@ -20,6 +20,6 @@
 
 Estimate: approximately 5–8 weeks of focused part-time work (planning estimate, not a deadline).
 
-## Milestone 0 exit gate
+## Milestone 1 exit gate
 
-GO only when the project is reproducible from a clean installation and M0 acceptance criteria pass. See `docs/PROGRESS.md` for verification results.
+The engine can run a small test case without requiring the final UI. See `docs/PROGRESS.md` for verification results and `src/engine/exit-gate.test.ts`.

@@ -18,9 +18,19 @@
 | Not-found | Unknown path renders 404 page |
 | E2E smoke | Playwright loads `/` and asserts identity copy |
 
+## Milestone 1 coverage (implemented)
+
+| Area | Tests |
+| --- | --- |
+| Content validation | Invalid unlock refs, duplicates, scoring refs; fixture accepts |
+| Progression | Act boundary, locked next step, rejected actions leave state unchanged, final-act stay |
+| Save/load | Valid restore; malformed; wrong case; bad schema version; structurally valid unknown IDs; memory storage double; rejected load preserves state + verdict answers |
+| Scoring | Master-plan weights; known total/categories; deterministic repeat; ADR-009 save/reload score equality |
+| Progression closeout | Final act `currentAct` remains a defined act number |
+| Exit gate | `src/engine/exit-gate.test.ts` — discover, puzzle, unlock, save/reload, repeatable score |
+
 ## Planned later coverage
 
-- **M1:** Schema validation, unlock rules, save/load, scoring determinism
 - **M3–M8:** Case completeness, puzzle solvability, interview unlocks, verdict explanations
 - **M10:** Full E2E investigation flows, mobile/keyboard, accessibility gates
 
