@@ -8,6 +8,8 @@ export const characterSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
   role: z.string().min(1),
+  /** Optional short profile for content packages. */
+  summary: z.string().min(1).optional(),
 })
 
 export const connectionSchema = z.object({
@@ -22,10 +24,46 @@ export const actSchema = z.object({
   completeWhen: unlockConditionSchema,
 })
 
-export const verdictQuestionSchema = z.object({
+export const verdictOptionSchema = z.object({
   id: z.string().min(1),
-  prompt: z.string().min(1),
-  correctAnswerId: z.string().min(1),
+  label: z.string().min(1),
+})
+
+export const verdictQuestionSchema = z
+  .object({
+    id: z.string().min(1),
+    prompt: z.string().min(1),
+    correctAnswerId: z.string().min(1),
+    /** Optional answer catalog; when present, correctAnswerId must match an option. */
+    options: z.array(verdictOptionSchema).min(2).optional(),
+  })
+  .superRefine((question, ctx) => {
+    if (!question.options) return
+    const optionIds = new Set(question.options.map((option) => option.id))
+    if (optionIds.size !== question.options.length) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['options'],
+        message: `Duplicate option ids on verdict question "${question.id}"`,
+      })
+    }
+    if (!optionIds.has(question.correctAnswerId)) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['correctAnswerId'],
+        message: `correctAnswerId "${question.correctAnswerId}" is not among options for "${question.id}"`,
+      })
+    }
+  })
+
+export const revealStepSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1),
+  body: z.string().min(1),
+})
+
+export const revealSequenceSchema = z.object({
+  steps: z.array(revealStepSchema).min(1),
 })
 
 export const scoringConfigSchema = z.object({
@@ -55,6 +93,13 @@ export const caseDefinitionSchema = z
     connections: z.array(connectionSchema).default([]),
     timelineEventIds: z.array(z.string().min(1)).min(1),
     scoring: scoringConfigSchema,
+    /**
+     * Optional gate for submitVerdict. Cases that omit it keep open verdict
+     * submission (fixture behavior). Uses the same unlock condition system.
+     */
+    verdictPrerequisite: unlockConditionSchema.optional(),
+    /** Post-completion narrative reveal; exposed only via getReveal when complete. */
+    reveal: revealSequenceSchema.optional(),
   })
   .superRefine((caseDef, ctx) => {
     const evidenceIds = new Set(caseDef.evidence.map((item) => item.id))
@@ -244,6 +289,26 @@ export const caseDefinitionSchema = z
       }
     }
 
+    if (caseDef.verdictPrerequisite) {
+      collectUnlockRefs(caseDef.verdictPrerequisite, (ref) => {
+        validateUnlockRef(ctx, ref, {
+          evidenceIds,
+          puzzleIds,
+          dialogueIds,
+          actNumbers,
+          path: ['verdictPrerequisite'],
+        })
+      })
+    }
+
+    if (caseDef.reveal) {
+      assertUnique(
+        ctx,
+        caseDef.reveal.steps.map((step) => step.id),
+        'reveal.steps',
+      )
+    }
+
     void connectionIds
   })
 
@@ -253,6 +318,9 @@ export type ConnectionDefinition = z.infer<typeof connectionSchema>
 export type ActDefinition = z.infer<typeof actSchema>
 export type ScoringConfig = z.infer<typeof scoringConfigSchema>
 export type VerdictQuestion = z.infer<typeof verdictQuestionSchema>
+export type VerdictOption = z.infer<typeof verdictOptionSchema>
+export type RevealStep = z.infer<typeof revealStepSchema>
+export type RevealSequence = z.infer<typeof revealSequenceSchema>
 
 type UnlockRef =
   | { kind: 'evidence'; id: string }

@@ -2,11 +2,43 @@
 
 ## Current milestone
 
-**M2 — Cinematic Visual Foundation**
+**M3 — Case 001 Content Engine**
 
-**Status:** PASS (pending human review; uncommitted; do not start M3 without GO)
+**Status:** PASS (pending human review; uncommitted; do not start M4 without GO)
 
-## Completed work (M2)
+## Completed work (M3)
+
+- Authored full `CASE_001` package under `src/content/cases/case-001/` (metadata, 4 characters, 3 acts, E001–E014, 3 interviews with beats, 5 puzzles, unlocks, verdict options, reveal sequence)
+- Extended schemas/engine with optional `summary`, dialogue `beats`, puzzle `prompt`, verdict `options`, `verdictPrerequisite`, `reveal`, plus `isComplete()` / `getReveal()`
+- Gated `submitVerdict` when `verdictPrerequisite` is set; unknown option IDs rejected; valid incorrect options accepted for scoring; rejected submissions preserve state and prior answers
+- Reveal unlocks only on case completion (final-act requirements + accepted verdict); premature `verdictSubmitted` in a loaded save cannot unlock reveal
+- Reconstruction and timeline scoring share one canonical order; playthrough passes the same player-submitted order to `completePuzzle` and `setTimelineOrder`
+- Headless playthrough covers early gates, perfect and imperfect verdicts, save round-trip, and premature-verdict reveal blocking
+- Public registry keeps `CASE_001` as **Coming soon**; `getCaseDefinition` loads engine content for development
+- Kept `CASE_FIX_001` and M1 exit-gate behavior for cases that omit the new optional fields
+
+## Verification results (executed)
+
+| Check | Result |
+| --- | --- |
+| `npm run typecheck` | PASS |
+| `npm run lint` | PASS |
+| `npm run test:run` | PASS (42 tests across 8 files) |
+| `npm run build` | PASS |
+| `npm run test:e2e` | PASS (3 Chromium tests) |
+| `git diff --check` | PASS |
+
+### CASE_001 playthrough
+
+```bash
+npx vitest run src/content/cases/case-001/playthrough.test.ts
+```
+
+## Prior milestone (M2)
+
+**Status:** PASS (verified baseline commit `8903a02` on `main`)
+
+### Completed work (M2)
 
 - Built six cinematic screens: Landing, Case selection, Case introduction, Investigation workspace shell, Settings, Credits
 - Extended AppShell with atmospheric background, original grain texture, and shared primary navigation
@@ -18,27 +50,6 @@
 - Settings implements FR-012 controls; sound prefs persist before audio is wired; Reset progress disabled with explanation
 - Reduced motion honors OS `prefers-reduced-motion` and in-app preference; large text size via `data-text-size`
 - Expanded Vitest and Playwright coverage for flow, overflow, keyboard focus, text size, and reduced motion
-
-## Verification results (executed)
-
-| Check | Result |
-| --- | --- |
-| `npm run typecheck` | PASS |
-| `npm run lint` | PASS |
-| `npm run test:run` | PASS (28 tests across 6 files) |
-| `npm run build` | PASS |
-| `npm run test:e2e` | PASS (3 Chromium tests) |
-| `git diff --check` | PASS |
-
-### Browser observations (Playwright Chromium)
-
-| Viewport | Result |
-| --- | --- |
-| 1440×900 | PASS — all six screens, flow, Settings/Credits, no horizontal overflow, no console errors |
-| 390×844 | PASS — same path; large text size keeps nav/actions usable; no overflow |
-| 320px width | PASS — overflow spot-check on all six routes |
-| Keyboard | PASS — skip link, Tab to Start investigation, focus moves to `#main-content` after route change, visible focus |
-| Reduced motion | PASS — in-app preference sets `data-reduced-motion`; OS `prefers-reduced-motion: reduce` exercised on case intro |
 
 ## Prior milestone (M1)
 
@@ -68,7 +79,8 @@
 - Sound settings persist preferences only; no audio playback is wired yet (intentional for M2).
 - Reset progress is disabled until save/restore UI exists in a later milestone.
 - Continue investigation remains deferred until save detection/restore can be validated.
+- CASE_001 remains Coming soon in the public selector until a later UI milestone deliberately enables it.
 
 ## Next milestone
 
-**M3 — Case 001 Content Engine** — not started. Requires explicit GO after M2 review and commit authorization.
+**M4 — Evidence Investigation System** — not started. Requires explicit GO after M3 review and commit authorization.

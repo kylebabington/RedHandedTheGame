@@ -148,3 +148,23 @@ Record of significant architectural and product decisions. Status labels: **Appr
 - Investigation workspace is shell-only; M1 engine contracts are unchanged. Zustand does not wrap `createGame` in M2.
 
 **Consequences:** Visual identity and navigation ship without premature save UX. Later milestones can enable Continue/Reset against the existing engine persistence port.
+
+---
+
+## ADR-013 — Optional verdict prerequisite, reveal gating, and CASE_001 access
+
+**Date:** 2026-11-16
+**Status:** Approved / Implemented (M3)
+
+**Context:** M3 requires interview content, a narrative reveal sequence, case completion, and gated final conclusions without building M4–M8 UI. Fixture cases must keep prior open-verdict behavior.
+
+**Decision:**
+
+- Extend case schemas additively: optional character `summary`, dialogue `beats`, puzzle `prompt`, verdict `options`, case `verdictPrerequisite` (unlock-condition union), and case `reveal`.
+- When `verdictPrerequisite` is set, `submitVerdict` is locked until it passes. Omitted prerequisite preserves fixture behavior.
+- When options are declared, unknown option IDs are rejected; valid incorrect options are accepted and scored. Rejected submissions restore state and prior verdict answers.
+- `isComplete()` requires final-act `completeWhen`, prerequisite satisfaction, and `verdictSubmitted`. `getReveal()` returns steps only when complete.
+- Reconstruction and timeline scoring share one canonical event order; the player-submitted order is passed to both `completePuzzle(P_RECONSTRUCTION)` and `setTimelineOrder`—never substitute the answer key.
+- Public registry keeps `CASE_001` as `coming-soon`. Engine content is available via `getCaseDefinition` / direct import for headless development.
+
+**Consequences:** M3 exit gate is proved without investigation UI. Save envelope format and `CASE_FIX_001` remain compatible. A later milestone must deliberately flip selector playability when UI is ready.

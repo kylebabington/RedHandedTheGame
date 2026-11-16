@@ -41,9 +41,24 @@
 | E2E flow | Playwright walkthrough at 1440×900 and 390×844; overflow spot-check at 320px |
 | E2E a11y | Skip link, focus after route change, large text on mobile, OS + in-app reduced motion |
 
+## Milestone 3 coverage (implemented)
+
+| Area | Tests |
+| --- | --- |
+| CASE_001 validation | Package accepts via `validateCase`; verdictPrerequisite / options refinements |
+| Completion / reveal | Early `submitVerdict` locked; unknown options rejected; imperfect options scored; premature save flag blocks reveal; completed save round-trip |
+| Playthrough | Fresh `createGame(case001)` reaches completion via legal actions; perfect and imperfect verdicts; early gates |
+| Fixture regression | `CASE_FIX_001` exit gate and open verdict (no prerequisite) still pass |
+
+### CASE_001 playthrough command
+
+```bash
+npx vitest run src/content/cases/case-001/playthrough.test.ts
+```
+
 ## Planned later coverage
 
-- **M3–M8:** Case completeness, puzzle solvability, interview unlocks, verdict explanations
+- **M4–M8:** Evidence UI, board, interview presentation, timeline UI, verdict explanations UI
 - **M10:** Full E2E investigation flows, broader accessibility gates
 
 ## Commands

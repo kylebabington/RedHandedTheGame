@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { case001 } from '@/content/cases/case-001'
 import { caseFix001 } from '@/content/cases/case-fix-001'
 import { validateCase } from './case'
 
@@ -6,6 +7,53 @@ describe('case content validation', () => {
   it('accepts the fixture case', () => {
     const result = validateCase(caseFix001)
     expect(result.success).toBe(true)
+  })
+
+  it('accepts CASE_001', () => {
+    const result = validateCase(case001)
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects verdictPrerequisite references to unknown puzzles', () => {
+    const result = validateCase({
+      ...caseFix001,
+      verdictPrerequisite: {
+        type: 'puzzlesAll',
+        puzzleIds: ['P_MISSING'],
+      },
+    })
+    expect(result.success).toBe(false)
+    if (result.success) return
+    expect(
+      result.errors.some((error) => error.path.includes('verdictPrerequisite')),
+    ).toBe(true)
+  })
+
+  it('rejects correctAnswerId outside declared options', () => {
+    const result = validateCase({
+      ...caseFix001,
+      scoring: {
+        ...caseFix001.scoring,
+        verdictQuestions: [
+          {
+            id: 'VQ_WHAT',
+            prompt: 'What happened to the key?',
+            correctAnswerId: 'not-listed',
+            options: [
+              { id: 'signed-out-early', label: 'Signed out early' },
+              { id: 'stolen-later', label: 'Stolen later' },
+            ],
+          },
+        ],
+      },
+    })
+    expect(result.success).toBe(false)
+    if (result.success) return
+    expect(
+      result.errors.some((error) =>
+        error.message.includes('not among options'),
+      ),
+    ).toBe(true)
   })
 
   it('rejects unknown unlock evidence references with a field path', () => {

@@ -1,3 +1,7 @@
+import type { CaseDefinition } from '@/engine/schemas/case'
+import { case001 } from '@/content/cases/case-001'
+import { caseFix001 } from '@/content/cases/case-fix-001'
+
 export type CaseRegistryEntry = {
   id: string
   title: string
@@ -8,8 +12,9 @@ export type CaseRegistryEntry = {
 }
 
 /**
- * UI-facing case catalog for Milestone 2.
- * Playable preview uses the M1 fixture; CASE_001 is a labeled future concept only.
+ * UI-facing case catalog.
+ * Public selector keeps CASE_001 as coming-soon through M3; engine content is
+ * available via getCaseDefinition for development / headless playthroughs.
  */
 export const caseRegistry: CaseRegistryEntry[] = [
   {
@@ -32,10 +37,22 @@ export const caseRegistry: CaseRegistryEntry[] = [
   },
 ]
 
+const caseDefinitions: Record<string, CaseDefinition> = {
+  CASE_FIX_001: caseFix001,
+  CASE_001: case001,
+}
+
 export function getCaseEntry(caseId: string): CaseRegistryEntry | undefined {
   return caseRegistry.find((entry) => entry.id === caseId)
 }
 
 export function getPlayableCases(): CaseRegistryEntry[] {
   return caseRegistry.filter((entry) => entry.status === 'playable')
+}
+
+/** Engine content loader. Does not imply public UI playability. */
+export function getCaseDefinition(
+  caseId: string,
+): CaseDefinition | undefined {
+  return caseDefinitions[caseId]
 }

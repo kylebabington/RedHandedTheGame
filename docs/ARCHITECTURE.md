@@ -17,6 +17,8 @@
 
 **Implemented (M2):** Cinematic screens and navigation (`/`, `/cases`, `/cases/:caseId/intro`, `/cases/:caseId/investigate`, `/settings`, `/credits`), atmospheric shell, original textures, case-file transition, settings preferences store (Zustand + localStorage). Investigation UI remains shell-level; engine is not wrapped for gameplay.
 
+**Implemented (M3):** Full `CASE_001` content package; optional case fields for interview beats, verdict options, verdict prerequisite, and reveal; `isComplete()` / `getReveal()`; headless playthrough proof. Public selector still labels CASE_001 Coming soon.
+
 ## High-level architecture
 
 ```
@@ -26,7 +28,7 @@ APP SHELL
    |
    +-- GAME ENGINE (state, rules, scoring)   [Implemented — M1]
    |
-   +-- CONTENT ENGINE (case data, assets)    [Fixture M1; UI registry M2; CASE_001 in M3]
+   +-- CONTENT ENGINE (case data, assets)    [Fixture M1; UI registry M2; CASE_001 content M3]
            |
            +-- VALIDATION (Zod)              [Implemented — M1]
            |
@@ -98,7 +100,11 @@ Definitions include unlock conditions, related evidence, asset refs, and accessi
 
 ## Dialogue system (M1 foundation)
 
-Dialogue entries unlock from conditions and can be completed. Full branching interview trees remain later milestones.
+Dialogue entries unlock from conditions and can be completed. Optional `beats` carry interview lines for content packages. Full branching interview trees remain later milestones.
+
+## Completion and reveal (M3)
+
+Optional `verdictPrerequisite` uses the unlock-condition system to gate `submitVerdict` (fixture omits it and stays open). `isComplete()` requires final-act `completeWhen`, prerequisite satisfaction, and `verdictSubmitted`. `getReveal()` returns reveal steps only when complete—so a premature verdict flag in a save cannot unlock the reveal.
 
 ## Verdict scoring (M1 foundation)
 
@@ -124,13 +130,13 @@ Versioned save envelope `{ schemaVersion, caseId, state, verdictAnswers? }`. Val
 2. Register the case in the UI registry (`src/content/registry.ts`) and add content modules.
 3. Engine and UI remain case-agnostic; only content and assets change.
 
-M1/M2 ship fixture `CASE_FIX_001` as the playable preview; `CASE_001` appears as a locked concept card only until M3.
+M1/M2 ship fixture `CASE_FIX_001` as the playable preview. M3 ships `CASE_001` engine content while the public selector keeps it **Coming soon**; `getCaseDefinition` loads definitions for development without flipping UI playability.
 
 ## Testing strategy
 
 | Layer | Focus | Status |
 | --- | --- | --- |
-| Unit | Engine rules, scoring, validation without UI | Implemented M1 (22 tests) |
+| Unit | Engine rules, scoring, validation without UI | Implemented M1; M3 adds CASE_001 playthrough + completion/reveal gates |
 | Component | Routing, pages, interactive UI | Implemented M0/M2 |
 | E2E | Critical player flows | M2 flow + a11y smoke; full investigation flows M10 |
 

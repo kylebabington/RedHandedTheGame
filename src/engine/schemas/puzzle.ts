@@ -44,6 +44,8 @@ export const puzzleSchema = z.object({
   act: z.number().int().positive(),
   unlock: unlockConditionSchema,
   solution: puzzleSolutionSchema,
+  /** Optional player-facing prompt; omitted by fixture cases. */
+  prompt: z.string().min(1).optional(),
 })
 
 export type PuzzleDefinition = z.infer<typeof puzzleSchema>

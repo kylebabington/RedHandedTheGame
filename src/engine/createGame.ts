@@ -5,7 +5,7 @@ import {
 import type { KeyValueStorage } from './persistence/storage'
 import { EngineError } from './rules/errors'
 import { isUnlocked } from './rules/unlocks'
-import type { CaseDefinition } from './schemas/case'
+import type { CaseDefinition, RevealStep } from './schemas/case'
 import {
   createInitialState,
   type GameState,
@@ -30,6 +30,10 @@ export type GameEngine = {
   removeConnection: (connectionId: string) => GameState
   setTimelineOrder: (order: string[]) => GameState
   submitVerdict: (answers: VerdictAnswers) => GameState
+  /** True when final-act requirements and an accepted verdict are both satisfied. */
+  isComplete: () => boolean
+  /** Reveal steps only after case completion; otherwise null. */
+  getReveal: () => RevealStep[] | null
   calculateScore: (answers?: VerdictAnswers) => ScoreResult
   serialize: () => SaveEnvelope
   loadSave: (raw: unknown) => LoadSaveResult
@@ -135,6 +139,32 @@ function applyProgression(
   // Re-check dialogue after act advance (actAtLeast unlocks).
   next = refreshDialogueUnlocks(caseDef, next)
   return next
+}
+
+function isFinalActSatisfied(
+  caseDef: CaseDefinition,
+  state: GameState,
+): boolean {
+  const finalAct = caseDef.acts[caseDef.acts.length - 1]
+  if (!finalAct) return false
+  if (state.currentAct < finalAct.number) return false
+  return isUnlocked(finalAct.completeWhen, state)
+}
+
+function isVerdictPrerequisiteMet(
+  caseDef: CaseDefinition,
+  state: GameState,
+): boolean {
+  if (!caseDef.verdictPrerequisite) return true
+  return isUnlocked(caseDef.verdictPrerequisite, state)
+}
+
+function isCaseComplete(caseDef: CaseDefinition, state: GameState): boolean {
+  return (
+    state.verdictSubmitted &&
+    isFinalActSatisfied(caseDef, state) &&
+    isVerdictPrerequisiteMet(caseDef, state)
+  )
 }
 
 export function createGame(caseDef: CaseDefinition): GameEngine {
@@ -361,6 +391,14 @@ export function createGame(caseDef: CaseDefinition): GameEngine {
       const snapshot = cloneState(state)
       const previousAnswers = verdictAnswers
       try {
+        if (!isVerdictPrerequisiteMet(caseDef, state)) {
+          throw new EngineError(
+            'LOCKED',
+            'Verdict submission is locked until case prerequisites are met',
+            'verdictPrerequisite',
+          )
+        }
+
         const questionIds = new Set(
           caseDef.scoring.verdictQuestions.map((question) => question.id),
         )
@@ -381,6 +419,17 @@ export function createGame(caseDef: CaseDefinition): GameEngine {
               'verdictAnswers',
             )
           }
+          const answerId = answers[question.id]
+          if (question.options) {
+            const allowed = new Set(question.options.map((option) => option.id))
+            if (!allowed.has(answerId)) {
+              throw new EngineError(
+                'INVALID_ANSWER',
+                `Unknown option id "${answerId}" for verdict question "${question.id}"`,
+                `verdictAnswers.${question.id}`,
+              )
+            }
+          }
         }
         verdictAnswers = { ...answers }
         return commit({
@@ -392,6 +441,20 @@ export function createGame(caseDef: CaseDefinition): GameEngine {
         verdictAnswers = previousAnswers
         throw error
       }
+    },
+
+    isComplete() {
+      return isCaseComplete(caseDef, state)
+    },
+
+    getReveal() {
+      if (!isCaseComplete(caseDef, state)) {
+        return null
+      }
+      if (!caseDef.reveal) {
+        return null
+      }
+      return caseDef.reveal.steps.map((step) => ({ ...step }))
     },
 
     calculateScore(answers) {
