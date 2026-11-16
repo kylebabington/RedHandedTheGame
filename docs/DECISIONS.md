@@ -128,3 +128,23 @@ Record of significant architectural and product decisions. Status labels: **Appr
 **Decision:** M1 proves the engine with original fictional fixture `CASE_FIX_001` (“The Empty Locker”), not production `CASE_001` content.
 
 **Consequences:** CASE_001 modules remain Milestone 3. The fixture exercises two acts, evidence unlocks, puzzles, dialogue, connections, timeline, save/load, and scoring.
+
+---
+
+## ADR-012 — M2 routes, registry, and settings preferences
+
+**Date:** 2026-11-15
+**Status:** Approved / Implemented (M2)
+
+**Context:** Milestone 2 needs cinematic screens and FR-012 settings without wiring investigation gameplay or Continuable save restore.
+
+**Decision:**
+
+- Routes: `/`, `/cases`, `/cases/:caseId/intro`, `/cases/:caseId/investigate`, `/settings`, `/credits`.
+- UI case registry lists playable `CASE_FIX_001` and locked concept `CASE_001` (“Coming soon”).
+- Landing primary CTA is **Start investigation** → `/cases`. Continue investigation is deferred until a later milestone can validate save/restore.
+- Settings use a Zustand store persisted to localStorage (`evidence-room-settings`) for sound prefs, volumes, reduced motion, and text size. Sound controls store preferences before audio is wired.
+- Reset progress is present but disabled in M2 with an explanation (no supported progress clear path yet).
+- Investigation workspace is shell-only; M1 engine contracts are unchanged. Zustand does not wrap `createGame` in M2.
+
+**Consequences:** Visual identity and navigation ship without premature save UX. Later milestones can enable Continue/Reset against the existing engine persistence port.

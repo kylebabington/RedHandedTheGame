@@ -2,11 +2,49 @@
 
 ## Current milestone
 
-**M1 — Game Engine**
+**M2 — Cinematic Visual Foundation**
 
-**Status:** PASS (pending human GO for Milestone 2)
+**Status:** PASS (pending human review; uncommitted; do not start M3 without GO)
 
-## Completed work (M1)
+## Completed work (M2)
+
+- Built six cinematic screens: Landing, Case selection, Case introduction, Investigation workspace shell, Settings, Credits
+- Extended AppShell with atmospheric background, original grain texture, and shared primary navigation
+- Added original paper/grain textures under `public/textures/`
+- Added shared `Button`, `CaseFileTransition` (Motion), focus-on-route-change, and settings document sync
+- Case registry UI lists playable fixture `CASE_FIX_001` and locked concept `CASE_001` (“Coming soon”)
+- Landing CTA labeled **Start investigation** routes to `/cases` (no Continue control in M2)
+- Workspace kept at shell level; M1 engine / save / scoring contracts untouched
+- Settings implements FR-012 controls; sound prefs persist before audio is wired; Reset progress disabled with explanation
+- Reduced motion honors OS `prefers-reduced-motion` and in-app preference; large text size via `data-text-size`
+- Expanded Vitest and Playwright coverage for flow, overflow, keyboard focus, text size, and reduced motion
+
+## Verification results (executed)
+
+| Check | Result |
+| --- | --- |
+| `npm run typecheck` | PASS |
+| `npm run lint` | PASS |
+| `npm run test:run` | PASS (28 tests across 6 files) |
+| `npm run build` | PASS |
+| `npm run test:e2e` | PASS (3 Chromium tests) |
+| `git diff --check` | PASS |
+
+### Browser observations (Playwright Chromium)
+
+| Viewport | Result |
+| --- | --- |
+| 1440×900 | PASS — all six screens, flow, Settings/Credits, no horizontal overflow, no console errors |
+| 390×844 | PASS — same path; large text size keeps nav/actions usable; no overflow |
+| 320px width | PASS — overflow spot-check on all six routes |
+| Keyboard | PASS — skip link, Tab to Start investigation, focus moves to `#main-content` after route change, visible focus |
+| Reduced motion | PASS — in-app preference sets `data-reduced-motion`; OS `prefers-reduced-motion: reduce` exercised on case intro |
+
+## Prior milestone (M1)
+
+**Status:** PASS (baseline commit `020e5d0` on `main`)
+
+### Completed work (M1)
 
 - Defined Zod schemas for case, evidence, puzzle, dialogue, unlock conditions, GameState, and save envelopes
 - Cross-reference validation with path-aware errors for unlocks, scoring refs, and related IDs
@@ -19,64 +57,18 @@
 - Headless exit-gate test plus focused tests for invalid content, locked actions, and invalid saves
 - Storage port with in-memory test double (no browser rendering required for engine tests)
 
-## Verification results (executed)
-
-| Check | Result |
-| --- | --- |
-| `npm run typecheck` | PASS |
-| `npm run lint` | PASS |
-| `npm run test:run` | PASS (23 tests across 6 files) |
-| `npm run build` | PASS |
-| `npm run test:e2e` | PASS (1 Chromium smoke test) |
-| `git diff --check` | PASS (after stripping ADR date trailing whitespace) |
-
-Exit-gate test: `src/engine/exit-gate.test.ts` — `M1 exit gate: fixture case progresses, persists, and scores deterministically`
-
-### M1 closeout review (2026-11-15)
-
-- Confirmed ADR-009 reload scoring: full `ScoreResult` equal before/after save → fresh engine → `loadSave`
-- Confirmed rejected `loadSave` preserves `GameState` and session `verdictAnswers`
-- Confirmed final-act completion keeps `currentAct` on a defined act
-- No engine contract bugs found; added/strengthened regressions only
-- ADR-009 updated with explicit caller reload flow
-
 ## Prior milestone (M0)
 
 **Status:** PASS (verified baseline commit `f3d7da4` on `main`)
-
-### Completed work (M0)
-
-- Verified workspace `C:\dev\Personal\RedHandedTheGame`
-- Initialized Git repository; M0 baseline committed as `f3d7da4`
-- Scaffolded Vite + React 19 + TypeScript app in place
-- Installed approved dependencies; retained `package-lock.json`
-- Configured Tailwind CSS v4, React Router, strict TypeScript, ESLint, Prettier, Vitest, Playwright
-- Preserved complete Version 1.0 master specification in `docs/MASTER_PLAN.md`
-- Created supporting source-of-truth documents
-- Added `.cursor/rules/evidence-room.mdc` (`alwaysApply: true`)
-- Built minimal accessible application shell (landing + 404) with design tokens
-- Documented planned game architecture
-- Added unit tests and Playwright smoke test
-- Verified isolated `npm ci` reproducibility
-
-### M0 verification (historical)
-
-| Check | Result |
-| --- | --- |
-| `npm run typecheck` | PASS |
-| `npm run lint` | PASS |
-| `npm run test:run` | PASS (3 tests at M0) |
-| `npm run build` | PASS |
-| `npm run test:e2e` | PASS (1 Chromium smoke test) |
-| `npm run dev` | PASS (server ready; HTTP 200) |
-| Isolated `npm ci` | PASS (`EXIT_NPM_CI=0`) |
 
 ## Known issues
 
 - Full `npm audit` previously reported moderate severity issues in the dependency tree; `npm audit --omit=dev` reports 0 vulnerabilities. No force-fix applied during M0.
 - Vite template TypeScript 7 was incompatible with `typescript-eslint@8`; project pinned to TypeScript 5.9 (ADR-003).
-- Zustand remains optional for M1; no React store wired to the UI yet (ADR-010).
+- Sound settings persist preferences only; no audio playback is wired yet (intentional for M2).
+- Reset progress is disabled until save/restore UI exists in a later milestone.
+- Continue investigation remains deferred until save detection/restore can be validated.
 
 ## Next milestone
 
-**M2 — Cinematic Visual Foundation** — not started. Requires explicit GO after M1 review.
+**M3 — Case 001 Content Engine** — not started. Requires explicit GO after M2 review and commit authorization.

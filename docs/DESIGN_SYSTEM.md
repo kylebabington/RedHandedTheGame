@@ -1,6 +1,6 @@
 # Design System — The Evidence Room
 
-**Status:** Approved requirements from master plan §9. Token foundation implemented in M0 CSS. Full cinematic UI is Milestone 2.
+**Status:** Approved requirements from master plan §9. Token foundation implemented in M0 CSS. Cinematic UI foundation implemented in Milestone 2.
 
 ## Design philosophy
 
@@ -51,8 +51,18 @@ Audio must be original. No unauthorized host voice imitation or copyrighted podc
 - CSS `@theme` tokens matching the approved palette
 - Font loading for Fraunces, DM Sans, IBM Plex Mono
 - Focus-visible styles and reduced-motion baseline
-- Minimal accessible shell (not the cinematic M2 interface)
+- Minimal accessible shell (superseded visually by M2)
 
-## Planned (M2+)
+## Implemented in M2
 
-Cinematic landing, atmospheric backgrounds, case-file transitions, evidence paper textures, polished components.
+- Cinematic AppShell with atmospheric background and original grain texture (`public/textures/`)
+- Shared crimson-accent buttons
+- Case-file transition on case introduction (Motion; respects reduced motion)
+- Paper texture on case-file surface
+- In-app reduced-motion preference (combined with OS preference)
+- Text-size preference (`default` / `large`) via `data-text-size`
+- Shared primary navigation across screens
+
+## Planned (later)
+
+Evidence inspection polish, board/interview/timeline visuals, audio skinning, pitch packaging motion.

@@ -1,5 +1,5 @@
-import { Link } from 'react-router'
 import { AppShell } from '@/components/layout/AppShell'
+import { Button } from '@/components/ui/Button'
 
 export function NotFoundPage() {
   return (
@@ -9,15 +9,10 @@ export function NotFoundPage() {
         <h1 id="not-found-title" className="font-display text-4xl font-semibold text-ink">
           Page not found
         </h1>
-        <p className="text-muted">
-          That route is not part of this prototype foundation.
-        </p>
-        <Link
-          to="/"
-          className="inline-flex w-fit items-center rounded-sm border border-border bg-surface px-4 py-2 text-sm text-ink transition-colors hover:border-crimson hover:text-ink"
-        >
+        <p className="text-muted">That route is not part of this prototype.</p>
+        <Button to="/" variant="secondary" className="w-fit">
           Return to The Evidence Room
-        </Link>
+        </Button>
       </section>
     </AppShell>
   )

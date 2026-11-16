@@ -29,10 +29,22 @@
 | Progression closeout | Final act `currentAct` remains a defined act number |
 | Exit gate | `src/engine/exit-gate.test.ts` — discover, puzzle, unlock, save/reload, repeatable score |
 
+## Milestone 2 coverage (implemented)
+
+| Area | Tests |
+| --- | --- |
+| Landing identity | Title, unofficial disclaimer, Start investigation → `/cases`, no Continue |
+| Flow | Landing → cases → intro → workspace shell |
+| Registry | Playable fixture card; locked CASE_001 labeled Coming soon |
+| Settings / Credits | Reachable via primary nav; Reset disabled; sound prefs copy |
+| Preferences | Text size and reduced-motion store updates |
+| E2E flow | Playwright walkthrough at 1440×900 and 390×844; overflow spot-check at 320px |
+| E2E a11y | Skip link, focus after route change, large text on mobile, OS + in-app reduced motion |
+
 ## Planned later coverage
 
 - **M3–M8:** Case completeness, puzzle solvability, interview unlocks, verdict explanations
-- **M10:** Full E2E investigation flows, mobile/keyboard, accessibility gates
+- **M10:** Full E2E investigation flows, broader accessibility gates
 
 ## Commands
 

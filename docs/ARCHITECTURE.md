@@ -4,7 +4,7 @@
 
 - **Approved:** Required by `docs/MASTER_PLAN.md`
 - **Planned:** Designed for later milestones; not implemented yet
-- **Implemented (M0/M1):** Present in the current codebase
+- **Implemented (M0/M1/M2):** Present in the current codebase
 - **Future proposal:** Pitch-era ideas pending later authorization
 
 ## Overview
@@ -13,23 +13,37 @@
 
 **Implemented (M0):** Application entry, React Router shell, global styles with design tokens, accessible page structure, landing page, and not-found route.
 
-**Implemented (M1):** Zod case/evidence/puzzle/dialogue schemas, pure `createGame` engine, unlock/act progression, versioned save/load with case-aware validation, deterministic scoring foundation, fixture case `CASE_FIX_001`, headless Vitest coverage. Zustand store not wired yet (optional; see ADR-010).
+**Implemented (M1):** Zod case/evidence/puzzle/dialogue schemas, pure `createGame` engine, unlock/act progression, versioned save/load with case-aware validation, deterministic scoring foundation, fixture case `CASE_FIX_001`, headless Vitest coverage.
+
+**Implemented (M2):** Cinematic screens and navigation (`/`, `/cases`, `/cases/:caseId/intro`, `/cases/:caseId/investigate`, `/settings`, `/credits`), atmospheric shell, original textures, case-file transition, settings preferences store (Zustand + localStorage). Investigation UI remains shell-level; engine is not wrapped for gameplay.
 
 ## High-level architecture
 
 ```
 APP SHELL
    |
-   +-- UI SYSTEM (screens, components)       [M0 shell; cinematic UI M2+]
+   +-- UI SYSTEM (screens, components)       [Implemented — M2 cinematic foundation]
    |
    +-- GAME ENGINE (state, rules, scoring)   [Implemented — M1]
    |
-   +-- CONTENT ENGINE (case data, assets)    [Fixture M1; CASE_001 in M3]
+   +-- CONTENT ENGINE (case data, assets)    [Fixture M1; UI registry M2; CASE_001 in M3]
            |
            +-- VALIDATION (Zod)              [Implemented — M1]
            |
-           +-- PERSISTENCE (storage port)    [Implemented — M1]
+           +-- PERSISTENCE (storage port)    [Implemented — M1; settings prefs M2]
 ```
+
+## Routes (M2)
+
+| Path | Screen |
+| --- | --- |
+| `/` | Landing |
+| `/cases` | Case selection |
+| `/cases/:caseId/intro` | Case introduction |
+| `/cases/:caseId/investigate` | Investigation workspace shell |
+| `/settings` | Settings |
+| `/credits` | Credits |
+| `*` | Not found |
 
 ## Case content schemas (M1)
 
@@ -102,23 +116,23 @@ Ratings: Master Investigator, Skeptic, Detective, Amateur Sleuth, Back to the Ev
 
 ## Persistence (M1)
 
-Versioned save envelope `{ schemaVersion, caseId, state, verdictAnswers? }`. Validated structurally and against the active case (act + entity IDs). Invalid saves fail without mutating active state. `KeyValueStorage` port supports memory doubles and `localStorage`. Settings persistence remains for later UI milestones.
+Versioned save envelope `{ schemaVersion, caseId, state, verdictAnswers? }`. Validated structurally and against the active case (act + entity IDs). Invalid saves fail without mutating active state. `KeyValueStorage` port supports memory doubles and `localStorage`. Settings preferences persist separately via Zustand localStorage (`evidence-room-settings`); game save/restore UI remains for later milestones.
 
 ## Adding a new case without rewriting the app
 
 1. Add `src/content/cases/case-00N/` with validated content and assets under `public/`.
-2. Register the case in a case registry (full registry arrives with M3).
+2. Register the case in the UI registry (`src/content/registry.ts`) and add content modules.
 3. Engine and UI remain case-agnostic; only content and assets change.
 
-M1 ships fixture `CASE_FIX_001` only.
+M1/M2 ship fixture `CASE_FIX_001` as the playable preview; `CASE_001` appears as a locked concept card only until M3.
 
 ## Testing strategy
 
 | Layer | Focus | Status |
 | --- | --- | --- |
 | Unit | Engine rules, scoring, validation without UI | Implemented M1 (22 tests) |
-| Component | Routing, pages, interactive UI | Implemented M0 smoke |
-| E2E | Critical player flows | M0 smoke; full flows M10 |
+| Component | Routing, pages, interactive UI | Implemented M0/M2 |
+| E2E | Critical player flows | M2 flow + a11y smoke; full investigation flows M10 |
 
 ## Stack notes
 
